@@ -20,6 +20,7 @@
 
 /* Author: Brian Gerkey */
 
+#include "asp/Asp.hpp"
 #include "nav2_amcl/amcl_node.hpp"
 
 #include <algorithm>
@@ -419,6 +420,11 @@ AmclNode::getOdomPose(
   double & x, double & y, double & yaw,
   const rclcpp::Time & sensor_timestamp, const std::string & frame_id)
 {
+
+  static Asp::Timer::sPtr timer = Asp::createTimer("getOdomPose");
+  static size_t count = 0;
+  timer->start(std::to_string(count));
+
   // Get the robot's pose
   geometry_msgs::msg::PoseStamped ident;
   ident.header.frame_id = nav2_util::strip_leading_slash(frame_id);
@@ -434,6 +440,7 @@ AmclNode::getOdomPose(
         get_logger(), "(%d) consecutive laser scan transforms failed: (%s)", scan_error_count_,
         e.what());
     }
+    timer->stop(std::to_string(count++));
     return false;
   }
 
@@ -442,6 +449,7 @@ AmclNode::getOdomPose(
   y = odom_pose.pose.position.y;
   yaw = tf2::getYaw(odom_pose.pose.orientation);
 
+  timer->stop(std::to_string(count++));
   return true;
 }
 
@@ -490,6 +498,11 @@ AmclNode::globalLocalizationCallback(
   const std::shared_ptr<std_srvs::srv::Empty::Request>/*req*/,
   std::shared_ptr<std_srvs::srv::Empty::Response>/*res*/)
 {
+  static Asp::Timer::sPtr timer = Asp::createTimer("globalLocalizationCallback");
+
+  static size_t count = 0;
+  timer->start(std::to_string(count));
+  
   std::lock_guard<std::recursive_mutex> cfl(mutex_);
 
   RCLCPP_INFO(get_logger(), "Initializing with uniform distribution");
@@ -500,6 +513,7 @@ AmclNode::globalLocalizationCallback(
   RCLCPP_INFO(get_logger(), "Global initialisation done!");
   initial_pose_is_known_ = true;
   pf_init_ = false;
+  timer->stop(std::to_string(count++));
 }
 
 void
@@ -642,6 +656,10 @@ AmclNode::laserReceived(sensor_msgs::msg::LaserScan::ConstSharedPtr laser_scan)
     }
     return;
   }
+
+  static Asp::Timer::sPtr timer = Asp::createTimer("laserReceived");
+  static size_t count = 0;
+  timer->start(std::to_string(count));
 
   std::string laser_scan_frame_id = nav2_util::strip_leading_slash(laser_scan->header.frame_id);
   last_laser_received_ts_ = now();
@@ -797,6 +815,11 @@ bool AmclNode::updateFilter(
   const sensor_msgs::msg::LaserScan::ConstSharedPtr & laser_scan,
   const pf_vector_t & pose)
 {
+
+  static Asp::Timer::sPtr timer = Asp::createTimer("updateFilter");
+  static size_t count = 0;
+  timer->start(std::to_string(count));
+
   nav2_amcl::LaserData ldata;
   ldata.laser = lasers_[laser_index];
   ldata.range_count = laser_scan->ranges.size();
@@ -819,6 +842,7 @@ bool AmclNode::updateFilter(
     RCLCPP_WARN(
       get_logger(), "Unable to transform min/max laser angles into base frame: %s",
       e.what());
+    timer->stop(std::to_string(count++));
     return false;
   }
   double angle_min = tf2::getYaw(min_q.quaternion);
@@ -870,6 +894,8 @@ bool AmclNode::updateFilter(
   lasers_[laser_index]->sensorUpdate(pf_, reinterpret_cast<nav2_amcl::LaserData *>(&ldata));
   lasers_update_[laser_index] = false;
   pf_odom_pose_ = pose;
+  
+  timer->stop(std::to_string(count++));
   return true;
 }
 
@@ -878,6 +904,11 @@ AmclNode::publishParticleCloud(const pf_sample_set_t * set)
 {
   // If initial pose is not known, AMCL does not know the current pose
   if (!initial_pose_is_known_) {return;}
+
+  static Asp::Timer::sPtr timer = Asp::createTimer("publishParticleCloud");
+  static size_t count = 0;
+  timer->start(std::to_string(count));
+
   auto cloud_with_weights_msg = std::make_unique<nav2_msgs::msg::ParticleCloud>();
   cloud_with_weights_msg->header.stamp = this->now();
   cloud_with_weights_msg->header.frame_id = global_frame_id_;
@@ -893,6 +924,7 @@ AmclNode::publishParticleCloud(const pf_sample_set_t * set)
   }
 
   particle_cloud_pub_->publish(std::move(cloud_with_weights_msg));
+  timer->stop(std::to_string(count++));
 }
 
 bool
@@ -1417,6 +1449,10 @@ AmclNode::mapReceived(const nav_msgs::msg::OccupancyGrid::SharedPtr msg)
 void
 AmclNode::handleMapMessage(const nav_msgs::msg::OccupancyGrid & msg)
 {
+  static Asp::Timer::sPtr timer = Asp::createTimer("handleMapMessage");
+  static size_t count = 0;
+  timer->start(std::to_string(count));
+
   std::lock_guard<std::recursive_mutex> cfl(mutex_);
 
   RCLCPP_INFO(
@@ -1437,11 +1473,16 @@ AmclNode::handleMapMessage(const nav_msgs::msg::OccupancyGrid & msg)
 #if NEW_UNIFORM_SAMPLING
   createFreeSpaceVector();
 #endif
+  timer->stop(std::to_string(count++));
 }
 
 void
 AmclNode::createFreeSpaceVector()
 {
+  static Asp::Timer::sPtr timer = Asp::createTimer("createFreeSpaceVector");
+  static size_t count = 0;
+  timer->start(std::to_string(count));
+
   int delta = freespace_downsampling_ ? 2 : 1;
   // Index of free space
   free_space_indices.resize(0);
@@ -1453,6 +1494,7 @@ AmclNode::createFreeSpaceVector()
       }
     }
   }
+  timer->stop(std::to_string(count++));
 }
 
 void
@@ -1475,6 +1517,11 @@ AmclNode::freeMapDependentMemory()
 map_t *
 AmclNode::convertMap(const nav_msgs::msg::OccupancyGrid & map_msg)
 {
+
+  static Asp::Timer::sPtr timer = Asp::createTimer("convertMap");
+  static size_t count = 0;
+  timer->start(std::to_string(count));
+
   map_t * map = map_alloc();
 
   map->size_x = map_msg.info.width;
@@ -1497,6 +1544,7 @@ AmclNode::convertMap(const nav_msgs::msg::OccupancyGrid & map_msg)
     }
   }
 
+  timer->stop(std::to_string(count++));
   return map;
 }
 
