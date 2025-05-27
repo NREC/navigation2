@@ -20,7 +20,7 @@
 
 /* Author: Brian Gerkey */
 
-#include "asp/Asp.hpp"
+#include "asp/AspRos2.hpp"
 #include "nav2_amcl/amcl_node.hpp"
 
 #include <algorithm>
@@ -422,8 +422,7 @@ AmclNode::getOdomPose(
 {
 
   static Asp::Timer::sPtr timer = Asp::createTimer("getOdomPose");
-  static size_t count = 0;
-  timer->start(std::to_string(count));
+  timer->start(Asp::toUuid(sensor_timestamp));
 
   // Get the robot's pose
   geometry_msgs::msg::PoseStamped ident;
@@ -440,7 +439,7 @@ AmclNode::getOdomPose(
         get_logger(), "(%d) consecutive laser scan transforms failed: (%s)", scan_error_count_,
         e.what());
     }
-    timer->stop(std::to_string(count++));
+    timer->stop(Asp::toUuid(sensor_timestamp));
     return false;
   }
 
@@ -449,7 +448,7 @@ AmclNode::getOdomPose(
   y = odom_pose.pose.position.y;
   yaw = tf2::getYaw(odom_pose.pose.orientation);
 
-  timer->stop(std::to_string(count++));
+  timer->stop(Asp::toUuid(sensor_timestamp));
   return true;
 }
 
