@@ -422,7 +422,7 @@ AmclNode::getOdomPose(
 {
 
   static Asp::Timer::sPtr timer = Asp::createTimer("getOdomPose");
-  Asp::ScopedProfile scoped (timer, Asp::toUuid(sensor_timestamp));
+  ASP_SCOPED(timer, sensor_timestamp);
 
   // Get the robot's pose
   geometry_msgs::msg::PoseStamped ident;
@@ -496,7 +496,7 @@ AmclNode::globalLocalizationCallback(
   std::shared_ptr<std_srvs::srv::Empty::Response>/*res*/)
 {
   static Asp::Timer::sPtr timer = Asp::createTimer("globalLocalizationCallback");
-  Asp::ScopedProfile scoped (timer, Asp::toUuid(now()));
+  ASP_SCOPED(timer, now());
   
   std::lock_guard<std::recursive_mutex> cfl(mutex_);
 
@@ -652,7 +652,7 @@ AmclNode::laserReceived(sensor_msgs::msg::LaserScan::ConstSharedPtr laser_scan)
   }
 
   static Asp::Timer::sPtr timer = Asp::createTimer("laserReceived");
-  Asp::ScopedProfile scoped (timer, Asp::toUuid(laser_scan->header));
+  ASP_SCOPED(timer, laser_scan->header);
 
   std::string laser_scan_frame_id = nav2_util::strip_leading_slash(laser_scan->header.frame_id);
   last_laser_received_ts_ = now();
@@ -809,7 +809,7 @@ bool AmclNode::updateFilter(
   const pf_vector_t & pose)
 {
   static Asp::Timer::sPtr timer = Asp::createTimer("updateFilter");
-  Asp::ScopedProfile scoped (timer, Asp::toUuid(laser_scan->header));
+  ASP_SCOPED(timer, laser_scan->header);
 
   nav2_amcl::LaserData ldata;
   ldata.laser = lasers_[laser_index];
@@ -895,7 +895,7 @@ AmclNode::publishParticleCloud(const pf_sample_set_t * set)
   if (!initial_pose_is_known_) {return;}
 
   static Asp::Timer::sPtr timer = Asp::createTimer("publishParticleCloud");
-  Asp::ScopedProfile scoped(timer, Asp::toUuid(now()));
+  ASP_SCOPED(timer, now());
 
   auto cloud_with_weights_msg = std::make_unique<nav2_msgs::msg::ParticleCloud>();
   cloud_with_weights_msg->header.stamp = this->now();
@@ -1437,7 +1437,7 @@ void
 AmclNode::handleMapMessage(const nav_msgs::msg::OccupancyGrid & msg)
 {
   static Asp::Timer::sPtr timer = Asp::createTimer("handleMapMessage");
-  Asp::ScopedProfile(timer, Asp::toUuid(msg.header));
+  ASP_SCOPED(timer, msg.header);
 
   std::lock_guard<std::recursive_mutex> cfl(mutex_);
 
@@ -1465,7 +1465,7 @@ void
 AmclNode::createFreeSpaceVector()
 {
   static Asp::Timer::sPtr timer = Asp::createTimer("createFreeSpaceVector");
-  Asp::ScopedProfile scoped (timer, Asp::toUuid(now()));
+  ASP_SCOPED(timer, now());
 
   int delta = freespace_downsampling_ ? 2 : 1;
   // Index of free space
@@ -1502,7 +1502,7 @@ AmclNode::convertMap(const nav_msgs::msg::OccupancyGrid & map_msg)
 {
 
   static Asp::Timer::sPtr timer = Asp::createTimer("convertMap");
-  Asp::ScopedProfile scoped(timer, Asp::toUuid(map_msg.header));
+  ASP_SCOPED(timer, map_msg.header);
 
   map_t * map = map_alloc();
 
