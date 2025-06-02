@@ -38,6 +38,8 @@
 #include "tf2/utils.h"
 #pragma GCC diagnostic pop
 
+#include "asp/AspRos2.hpp"
+
 
 namespace nav2_behaviors
 {
@@ -218,6 +220,9 @@ protected:
         "Called while inactive, ignoring request.");
       return;
     }
+
+    static Asp::Timer::sPtr timer = Asp::createTimer(behavior_name_);
+    ASP_SCOPED(timer, clock_->now());
 
     // Initialize the ActionT result
     auto result = std::make_shared<typename ActionT::Result>();
