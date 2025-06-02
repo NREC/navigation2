@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 project(nav2_amcl)
 
+find_package(asp REQUIRED)
 find_package(ament_cmake REQUIRED)
 find_package(nav2_common REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -17,7 +18,6 @@ find_package(tf2 REQUIRED)
 find_package(nav2_util REQUIRED)
 find_package(nav2_msgs REQUIRED)
 find_package(pluginlib REQUIRED)
-find_package(asp REQUIRED)
 
 nav2_package()
 
@@ -52,6 +52,7 @@ if(HAVE_DRAND48)
 endif()
 
 set(dependencies
+  asp
   rclcpp
   rclcpp_lifecycle
   rclcpp_components
@@ -66,7 +67,6 @@ set(dependencies
   nav2_util
   nav2_msgs
   pluginlib
-  asp
 )
 
 ament_target_dependencies(${executable_name}
@@ -110,7 +110,7 @@ if(BUILD_TESTING)
 endif()
 
 ament_export_include_directories(include)
-ament_export_libraries(${library_name} pf_lib sensors_lib motions_lib map_lib)
+ament_export_libraries(${library_name} pf_lib sensors_lib motions_lib map_lib asp)
 ament_export_dependencies(${dependencies})
 pluginlib_export_plugin_description_file(nav2_amcl plugins.xml)
 ament_package()
