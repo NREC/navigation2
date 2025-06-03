@@ -156,6 +156,8 @@ public:
     vel_pub_ = std::make_unique<nav2_util::TwistPublisher>(node, "cmd_vel", 1);
 
     onConfigure();
+
+    timer_ = Asp::createTimer(behavior_name_);
   }
 
   // Cleanup server on lifecycle transition
@@ -201,6 +203,7 @@ protected:
   std::string robot_base_frame_;
   double transform_tolerance_;
   rclcpp::Duration elasped_time_{0, 0};
+  std::shared_ptr<Asp::Timer> timer_ { nullptr};
 
   // Clock
   rclcpp::Clock::SharedPtr clock_;
@@ -222,7 +225,7 @@ protected:
     }
 
     static Asp::Timer::sPtr timer = Asp::createTimer(behavior_name_);
-    ASP_SCOPED(timer, clock_->now());
+    ASP_SCOPED(timer_, clock_->now());
 
     // Initialize the ActionT result
     auto result = std::make_shared<typename ActionT::Result>();
