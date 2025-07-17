@@ -38,7 +38,7 @@
 #include "tf2/utils.h"
 #pragma GCC diagnostic pop
 
-#include "asp/AspRos2.hpp"
+#include "asp_ros/asp_ros.hpp"
 
 
 namespace nav2_behaviors
