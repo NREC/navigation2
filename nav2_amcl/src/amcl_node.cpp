@@ -20,7 +20,7 @@
 
 /* Author: Brian Gerkey */
 
-#include "asp/AspRos2.hpp"
+#include "asp_ros/asp_ros.hpp"
 #include "nav2_amcl/amcl_node.hpp"
 
 #include <algorithm>

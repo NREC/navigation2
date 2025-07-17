@@ -22,7 +22,7 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <build_depend>nav2_common</build_depend>
-  <build_depend>asp</build_depend>
+  <depend>asp_ros</depend>
   <depend>rclcpp</depend>
   <depend>tf2_geometry_msgs</depend>
   <depend>geometry_msgs</depend>

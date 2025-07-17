@@ -29,7 +29,7 @@ from launch.actions import (
 )
 from launch.conditions import IfCondition
 from launch.event_handlers import OnShutdown
-from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.launch_description_sources import PythonLaunchDescriptionSource, AnyLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PythonExpression
 
 from launch_ros.actions import Node
@@ -40,6 +40,7 @@ def generate_launch_description():
     bringup_dir = get_package_share_directory('nav2_bringup')
     launch_dir = os.path.join(bringup_dir, 'launch')
     sim_dir = get_package_share_directory('nav2_minimal_tb3_sim')
+    asp_dir = get_package_share_directory('asp-backend')
 
     # Create the launch configuration variables
     slam = LaunchConfiguration('slam')
@@ -250,6 +251,10 @@ def generate_launch_description():
                           'pitch': pose['P'],
                           'yaw': pose['Y']}.items())
 
+    asp_backend = IncludeLaunchDescription(
+            AnyLaunchDescriptionSource(
+                os.path.join(asp_dir, 'launch', 'asp_backend.launch.xml')))
+
     # Create the launch description and populate
     ld = LaunchDescription()
 
@@ -283,5 +288,7 @@ def generate_launch_description():
     ld.add_action(start_robot_state_publisher_cmd)
     ld.add_action(rviz_cmd)
     ld.add_action(bringup_cmd)
+
+    ld.add_action(asp_backend)
 
     return ld
